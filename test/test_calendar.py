@@ -26,3 +26,9 @@ class TestCalendar(unittest.TestCase):
         print(self.cal.monthdays2calendar_ext(2024, 1))
         print(self.cal.monthdays2calendar_ext(2024, 12))
         print(self.cal.monthdays2calendar_ext(2025, 1))
+
+    def test_cmp(self):
+        print(self.cal.monthdays2calendar_ext(2024, 1)[0])
+        print(list(self.cal.itermonthdays4(2024, 1))[:7])
+        print(self.cal.monthdays2calendar_ext(2025, 1)[0])
+        print(list(self.cal.itermonthdays4(2025, 1))[:7])
