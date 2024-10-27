@@ -1,4 +1,5 @@
 import flet as ft
+
 from mycalendar import MyCalendar
 
 calendar = MyCalendar(firstweekday=0, locale="fr")
@@ -29,8 +30,12 @@ class MonthHeader(ft.Row):
             self.controls.append(obday)
 
 class Week(ft.Row):
-    def __init__(self, year : int, month : int, mdays : list[(int, int)], num_week=None):
+    def __init__(self, year : int, month : int, mdays : list[(int, int)], num_week=None,
+                 bgcolor=ft.colors.TRANSPARENT):
         super().__init__(spacing=2)
+        self.year = year
+        self.month = month
+        self.week = num_week
         if num_week:
             obweek = ft.Container(
                     content=ft.Text(value=num_week),
@@ -38,7 +43,7 @@ class Week(ft.Row):
                     margin=0,
                     width=30,
                     height=30,
-                    bgcolor=ft.colors.TRANSPARENT,
+                    bgcolor=bgcolor,
                     border_radius=ft.border_radius.all(5))
             self.controls.append(obweek)
             mdays = [reversed(p) for p in mdays]
@@ -59,9 +64,22 @@ class Week(ft.Row):
                     border_radius=ft.border_radius.all(5))
             self.controls.append(obday)
 
+    def traverse_weeks(self, func : callable):
+        if self.week:
+            func(self.controls[0], self.year, self.month, self.week)
+
+    def traverse_days(self, func: callable):
+        start = 1 if self.week else 0
+        for c in self.controls[start:]:
+            func(c, self.year, self.month, c.controls[0].value)
+
+
+
 class Month(ft.Column):
     def __init__(self, year : int, month : int):
         super().__init__(spacing=4)
+        self.year = year
+        self.month = month
         self.controls = [
             ft.Row(
             [ft.Text(value=calendar.month_name(year, month),
@@ -73,5 +91,15 @@ class Month(ft.Column):
 
         for wdata in calendar.monthdays2calendar_ext(year, month):
             numw, wdays = wdata
-            self.controls.append(Week(year, month, wdays, numw))
+            bg = ft.colors.TRANSPARENT
+            if numw%2 == 0: bg = ft.colors.GREEN
+            self.controls.append(Week(year, month, wdays, numw, bgcolor=bg))
+
+    def traverse_weeks(self, func : callable):
+        for c in self.controls[2:]:
+            c.traverse_weeks()
+
+    def traverse_days(self, func: callable):
+        for c in self.controls[2:]:
+            c.traverse_days()
 
